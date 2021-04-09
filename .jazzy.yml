@@ -1,0 +1,10 @@
+author: Andreas Pfurtscheller
+author_url: https://github.com/aplr
+module: Richi
+clean: true
+readme: README.md
+documentation: docs/*.md
+theme: fullwidth
+github_url: https://github.com/aplr/Richi
+swift_build_tool: spm
+build_tool_arguments: ["-Xswiftc", "-swift-version", "-Xswiftc", "5"]

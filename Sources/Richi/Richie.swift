@@ -1,5 +1,5 @@
 //
-//  Richie.swift
+//  Richi.swift
 //  Core
 //
 //  Created by Andreas Pfurtscheller on 07.04.21.
@@ -8,7 +8,7 @@
 import Foundation
 import AVFoundation
 
-public struct Richie {
+public struct Richi {
     
     public enum Gravity {
         case fill
@@ -20,7 +20,7 @@ public struct Richie {
         case stopped
         case playing
         case paused
-        case failed(_ error: Richie.Error)
+        case failed(_ error: Richi.Error)
 
         public var description: String {
             switch self {
@@ -35,7 +35,7 @@ public struct Richie {
             }
         }
         
-        public static func == (lhs: Richie.PlaybackState, rhs: Richie.PlaybackState) -> Bool {
+        public static func == (lhs: Richi.PlaybackState, rhs: Richi.PlaybackState) -> Bool {
             switch (lhs, rhs) {
             case (.stopped, .stopped): return true
             case (.playing, .playing): return true
@@ -85,7 +85,7 @@ public struct Richie {
     }
 }
 
-extension Richie.Error: LocalizedError {
+extension Richi.Error: LocalizedError {
     
     public var errorDescription: String? {
         switch self {

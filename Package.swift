@@ -3,15 +3,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "Richie",
+    name: "Richi",
     platforms: [
         .iOS(.v9),
         .tvOS(.v9),
     ],
     products: [
         .library(
-            name: "Richie",
-            targets: ["Richie"]
+            name: "Richi",
+            targets: ["Richi"]
         ),
     ],
     dependencies: [
@@ -22,12 +22,12 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Richie",
+            name: "Richi",
             dependencies: ["PINCache"]
         ),
         .testTarget(
-            name: "RichieTests",
-            dependencies: ["Richie"]
+            name: "RichiTests",
+            dependencies: ["Richi"]
         ),
     ],
     swiftLanguageVersions: [.v5]

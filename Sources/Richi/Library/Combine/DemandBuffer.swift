@@ -1,6 +1,6 @@
 //
 //  DemandBuffer.swift
-//  Richie
+//  Richi
 //
 //  Created by Andreas Pfurtscheller on 07.04.21.
 //

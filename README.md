@@ -1,9 +1,9 @@
-# Richie
+# Richi
 
-Richie is an easy-to-use video player library written in Swift, with support for iOS, tvOS and macOS.
+Richi is an easy-to-use video player library written in Swift, with support for iOS, tvOS and macOS.
 It provides you a VideoPlayerView with a simple yet powerful API, which makes playing videos a joy on iOS and macOS.
 
-Richie builds on top of AVPlayer and aims at simplifying its interface, while providing additional features such as:
+Richi builds on top of AVPlayer and aims at simplifying its interface, while providing additional features such as:
 
 - Playback events using delegates
 - Time observing using delegates and Combine

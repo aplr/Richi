@@ -21,16 +21,16 @@ import AVFoundation
 public protocol VideoPlayerDelegate: AnyObject {
     func playerReady(_ player: VideoPlayer)
     
-    func player(_ player: VideoPlayer, didChangePlaybackStateFrom oldState: Richie.PlaybackState, to newState: Richie.PlaybackState)
-    func player(_ player: VideoPlayer, didChangeBufferingStateFrom oldState: Richie.BufferingState, to newState: Richie.BufferingState)
+    func player(_ player: VideoPlayer, didChangePlaybackStateFrom oldState: Richi.PlaybackState, to newState: Richi.PlaybackState)
+    func player(_ player: VideoPlayer, didChangeBufferingStateFrom oldState: Richi.BufferingState, to newState: Richi.BufferingState)
 
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set progress.
     func player(_ player: VideoPlayer, didChangeBufferTime bufferTime: Double)
 
-    func player(_ player: VideoPlayer, didFailWithError error: Richie.Error)
+    func player(_ player: VideoPlayer, didFailWithError error: Richi.Error)
     
-    func player(_ player: VideoPlayer, didLoadAsset asset: Richie.Asset)
+    func player(_ player: VideoPlayer, didLoadAsset asset: Richi.Asset)
     func playerWillStartFromBeginning(_ player: VideoPlayer)
     func playerDidEnd(_ player: VideoPlayer)
     func playerWillLoop(_ player: VideoPlayer)
@@ -59,8 +59,8 @@ public class VideoPlayer: View {
         return player
     }()
     
-    public var gravity: Richie.Gravity {
-        get { Richie.Gravity(videoGravity: playerLayer.videoGravity) }
+    public var gravity: Richi.Gravity {
+        get { Richi.Gravity(videoGravity: playerLayer.videoGravity) }
         set { playerLayer.videoGravity = newValue.videoGravity }
     }
     
@@ -92,7 +92,7 @@ public class VideoPlayer: View {
         set { player.rate = newValue }
     }
     
-    open var actionAtEnd: Richie.EndAction = .pause
+    open var actionAtEnd: Richi.EndAction = .pause
     
     /// Controls if playback is paused when the application is no longer active
     open var pauseWhenResigningActive: Bool = true
@@ -107,7 +107,7 @@ public class VideoPlayer: View {
     open var resumeWhenEnteringForeground: Bool = false
     
     /// Current playback state of the Player
-    open var playbackState: Richie.PlaybackState = .stopped {
+    open var playbackState: Richi.PlaybackState = .stopped {
         didSet {
             if playbackState != oldValue {
                 runOnMainLoop { self.playbackStateDidChange(from: oldValue) }
@@ -116,7 +116,7 @@ public class VideoPlayer: View {
     }
     
     /// Current buffering state of the Player
-    open var bufferingState: Richie.BufferingState = .unknown {
+    open var bufferingState: Richi.BufferingState = .unknown {
         didSet {
             if bufferingState != oldValue {
                 runOnMainLoop { self.bufferingStateDidChange(from: oldValue) }
@@ -193,7 +193,7 @@ public class VideoPlayer: View {
     private var _preferredMaximumResolution: CGSize = .zero
     
     /// The current asset
-    open var asset: Richie.Asset?
+    open var asset: Richi.Asset?
     
     /// The current player item
     var playerItem: AVPlayerItem? {
@@ -223,7 +223,7 @@ public class VideoPlayer: View {
         addLifecycleObservers()
     }
     
-    private func playbackStateDidChange(from oldValue: Richie.PlaybackState) {
+    private func playbackStateDidChange(from oldValue: Richi.PlaybackState) {
         if case let .failed(error) = playbackState {
             delegate?.player(self, didFailWithError: error)
         }
@@ -231,7 +231,7 @@ public class VideoPlayer: View {
         delegate?.player(self, didChangePlaybackStateFrom: oldValue, to: playbackState)
     }
     
-    private func bufferingStateDidChange(from oldValue: Richie.BufferingState) {
+    private func bufferingStateDidChange(from oldValue: Richi.BufferingState) {
         self.delegate?.player(self, didChangeBufferingStateFrom: oldValue, to: self.bufferingState)
     }
     
@@ -271,7 +271,7 @@ extension VideoPlayer {
     /// automatically as soon as the player is ready.
     ///
     /// - Parameter asset: The asset to be played
-    open func load(asset: Richie.Asset) {
+    open func load(asset: Richi.Asset) {
         // pause the player before loading a new asset
         if playbackState == .playing {
             pause()
@@ -495,7 +495,7 @@ extension VideoPlayer {
         player.actionAtItemEnd = actionAtEnd.action
     }
     
-    func updateAsset(_ asset: Richie.Asset) {
+    func updateAsset(_ asset: Richi.Asset) {
         if playbackState == .playing {
             pause()
         }
@@ -527,7 +527,7 @@ extension VideoPlayer {
     
 }
 
-extension Richie.Gravity {
+extension Richi.Gravity {
     
     init(videoGravity: AVLayerVideoGravity) {
         switch videoGravity {
@@ -547,7 +547,7 @@ extension Richie.Gravity {
     }
 }
 
-extension Richie.EndAction {
+extension Richi.EndAction {
     
     var action: AVPlayer.ActionAtItemEnd {
         switch self {

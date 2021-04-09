@@ -1,6 +1,6 @@
 //
 //  Sequence+InvalidateKeyValueObservation.swift
-//  Richie
+//  Richi
 //
 //  Created by Andreas Pfurtscheller on 09.04.21.
 //
