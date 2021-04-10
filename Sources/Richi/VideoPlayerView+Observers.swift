@@ -16,7 +16,7 @@ extension VideoPlayer {
     private func removeInternalTimeObserver() {
         guard let playerTimeObserver = playerTimeObserver else { return }
         
-        self.removeTimeObserver(playerTimeObserver)
+        removeTimeObserver(playerTimeObserver)
         self.playerTimeObserver = nil
     }
     
@@ -25,11 +25,11 @@ extension VideoPlayer {
         removeInternalTimeObserver()
         
         // Don't set up a new observer if we have no delegate listening
-        guard self.timeDelegate != nil else { return }
+        guard timeDelegate != nil else { return }
         
         // Create a new periodic time observer
         let interval = CMTime(seconds: timeObserverInterval, preferredTimescale: 1000)
-        playerTimeObserver = self.addPeriodicTimeObserver(forInterval: interval, using: { [weak self] time in
+        playerTimeObserver = addPeriodicTimeObserver(forInterval: interval, using: { [weak self] time in
             guard let self = self else { return }
             
             self.timeDelegate?.player(self, didChangeCurrentTime: time.seconds)
@@ -37,22 +37,20 @@ extension VideoPlayer {
     }
     
     func addPlayerObservers() {
-        if #available(macOS 10.12, iOS 10.0, tvOS 10.0, *) {
-            playerObservers.append(
-                player.observe(\.timeControlStatus, options: [.new, .old]) { [weak self] (object, change) in
-                    switch object.timeControlStatus {
-                    case .paused:
-                        self?.playbackState = .paused(.waitKeepUp)
-                    case .playing:
-                        self?.playbackState = .playing
-                    case .waitingToPlayAtSpecifiedRate:
-                        fallthrough
-                    @unknown default:
-                        break
-                    }
+        playerObservers.append(
+            player.observe(\.timeControlStatus, options: [.new, .old]) { [weak self] (object, change) in
+                switch object.timeControlStatus {
+                case .paused:
+                    self?.playbackState = .paused
+                case .playing:
+                    self?.playbackState = .playing
+                case .waitingToPlayAtSpecifiedRate:
+                    fallthrough
+                @unknown default:
+                    break
                 }
-            )
-        }
+            }
+        )
     }
     
     func removePlayerObservers() {
@@ -60,7 +58,6 @@ extension VideoPlayer {
         playerObservers.invalidateAll()
         playerObservers.removeAll()
     }
-    
 }
 
 
@@ -87,7 +84,7 @@ extension VideoPlayer {
         playerItemObservers.append(
             playerItem.observe(\.status, options: [.new, .old], changeHandler: { [weak self] (playerItem, change) in
                 guard let self = self else { return }
-
+                
                 if playerItem.status == .failed {
                     self.playbackState = .failed(.playerItemError(playerItem.error))
                 } else if playerItem.status == .readyToPlay, let asset = self.asset {
@@ -123,28 +120,7 @@ extension VideoPlayer {
             playerItem.observe(\.loadedTimeRanges, options: [.new, .old]) { [weak self] (object, change) in
                 guard let self = self else { return }
 
-//                let timeRanges = object.loadedTimeRanges
-//                if let timeRange = timeRanges.first?.timeRangeValue {
-//                    let bufferedTime = (timeRange.start + timeRange.duration).seconds
-//                    if self._lastBufferTime != bufferedTime {
-//                        self._lastBufferTime = bufferedTime
-//                        self.runOnMainLoop {
-//                            self.delegate?.player(self, didChangeBufferTime: bufferedTime)
-//                        }
-//                    }
-//                }
-//
-//                let currentTime = object.currentTime().seconds
-//                let passedTime = self._lastBufferTime <= 0 ? currentTime : (self._lastBufferTime - currentTime)
-//
-//                if (
-//                    passedTime >= self.bufferSizeInSeconds ||
-//                        self._lastBufferTime == self.duration ||
-//                    timeRanges.first == nil
-//                ) &&
-//                    self.playbackState == .playing {
-//                    self.playIfPossible()
-//                }
+                self.bufferDidChange()
             }
         )
     }
@@ -172,6 +148,25 @@ extension VideoPlayer {
         playerItemObservers.removeAll()
     }
     
+    func bufferDidChange() {
+        guard let playerItem = playerItem else { return }
+        
+        let timeRanges = playerItem.loadedTimeRanges
+        
+        if let timeRange = timeRanges.first?.timeRangeValue {
+            let bufferedTime = (timeRange.start + timeRange.duration).seconds
+            if _lastBufferTime != bufferedTime {
+                _lastBufferTime = bufferedTime
+                self.runOnMainLoop {
+                    self.delegate?.player(self, didChangeBufferTime: bufferedTime)
+                }
+            }
+        }
+
+        if playerItem.isPlaybackLikelyToKeepUp, pausedReason == .waitKeepUp {
+            self.autoPlay()
+        }
+    }
 }
 
 // MARK: - Player Layer Observers
@@ -192,5 +187,4 @@ extension VideoPlayer {
         playerLayerObserver?.invalidate()
         playerLayerObserver = nil
     }
-    
 }

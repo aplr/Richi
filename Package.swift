@@ -5,8 +5,9 @@ import PackageDescription
 let package = Package(
     name: "Richi",
     platforms: [
-        .iOS(.v9),
-        .tvOS(.v9),
+        .iOS(.v10),
+        .tvOS(.v10),
+        .macOS(.v10_12)
     ],
     products: [
         .library(

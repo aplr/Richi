@@ -62,6 +62,12 @@ public class VideoPlayer: View {
         set { player.preventsDisplaySleepDuringVideoPlayback = newValue }
     }
     
+    /// A boolean value that indicates whether video playback is playing
+    open var isPlaying: Bool {
+        get { playbackState == .playing }
+        set { play(newValue) }
+    }
+    
     /// The current playback rate
     open var rate: Float = 1 {
         didSet {
@@ -87,8 +93,10 @@ public class VideoPlayer: View {
     /// Controls if playback is resumed when the application is about to enter the foreground
     open var resumeWhenEnteringForeground: Bool = false
     
+    var pausedReason: Richi.PausedReason = .waitKeepUp
+    
     /// Current playback state of the Player
-    open var playbackState: Richi.PlaybackState = .stopped {
+    var playbackState: Richi.PlaybackState = .stopped {
         didSet {
             if playbackState != oldValue {
                 runOnMainLoop { self.playbackStateDidChange(from: oldValue) }
@@ -168,10 +176,10 @@ public class VideoPlayer: View {
     var playerLayerObserver: NSKeyValueObservation?
     
     // Hidden vars
-    private var _lastBufferTime: Double = 0
-    private var _requestedSeekTime: CMTime?
-    private var _preferredPeakBitRate: Double = 0
-    private var _preferredMaximumResolution: CGSize = .zero
+    var _lastBufferTime: Double = 0
+    var _requestedSeekTime: CMTime?
+    var _preferredPeakBitRate: Double = 0
+    var _preferredMaximumResolution: CGSize = .zero
     
     /// The current asset
     open var asset: Richi.Asset?
@@ -194,8 +202,8 @@ public class VideoPlayer: View {
     
     private func commonSetup() {
         #if os(macOS)
-        self.wantsLayer = true
-        self.layer = AVPlayerLayer()
+        wantsLayer = true
+        layer = AVPlayerLayer()
         #endif
         
         playerLayer.player = player
@@ -213,7 +221,7 @@ public class VideoPlayer: View {
     }
     
     private func bufferingStateDidChange(from oldValue: Richi.BufferingState) {
-        self.delegate?.player(self, didChangeBufferingStateFrom: oldValue, to: self.bufferingState)
+        delegate?.player(self, didChangeBufferingStateFrom: oldValue, to: bufferingState)
     }
     
     func didPlayToEndTime() {
@@ -253,12 +261,16 @@ extension VideoPlayer {
     ///
     /// - Parameter asset: The asset to be played
     open func load(asset: Richi.Asset) {
-        // pause the player before loading a new asset
+        // Do nothing if the asset did not change
+        guard asset != self.asset else { return }
+        
+        // Stop the player before loading a new asset
         if playbackState == .playing {
-            pause()
+            stop()
         }
         
-        playbackState = autoplay ? .playing : .stopped
+        playbackState = .stopped
+        pausedReason = .waitKeepUp
 
         updatePlayerItem(nil)
 
@@ -271,29 +283,34 @@ extension VideoPlayer {
         player.seek(to: .zero) { _ in self.play() }
     }
 
-    /// Continues playing the current asset
-    open func play() {
-        playbackState = .playing
-        if #available(OSX 10.12, iOS 10.0, tvOS 10.0, *) {
-            player.playImmediately(atRate: rate)
-        } else {
-            player.play()
+    
+    /// Continues playing the current asset if `shouldPlay` is `true`,
+    /// pauses playback otherwise.
+    /// - Parameter shouldPlay: Indicates if the player should play or pause
+    open func play(_ shouldPlay: Bool = true) {
+        guard shouldPlay else {
+            pause(reason: .userInteraction)
+            return
         }
+        
+        // The only reason the player pauses itself after we initiated play
+        // is that it can't keep up with buffering the data.
+        pausedReason = .waitKeepUp
+        player.playImmediately(atRate: rate)
     }
     
     /// Continues playing the current asset if autoplay is enabled
-    func playIfPossible() {
-        if autoplay {
-            play()
-        }
+    func autoPlay() {
+        guard autoplay else { return }
+        play()
     }
     
     /// Pauses playback of the current asset
     open func pause(reason: Richi.PausedReason = .userInteraction) {
         guard playbackState.isPausable else { return }
 
+        pausedReason = reason
         player.pause()
-        playbackState = .paused(reason)
     }
     
     /// Stops playback of the current asset.
@@ -301,6 +318,7 @@ extension VideoPlayer {
         if playbackState == .stopped { return }
 
         player.pause()
+        pausedReason = .stopped
         playbackState = .stopped
         delegate?.playerDidEnd(self)
     }
@@ -330,7 +348,10 @@ extension VideoPlayer {
         toleranceAfter: CMTime,
         completionHandler: ((Bool) -> Void)? = nil
     ) {
-        guard let playerItem = playerItem else { return }
+        guard let playerItem = playerItem else {
+            _requestedSeekTime = time
+            return
+        }
         
         playerItem.seek(
             to: time,
@@ -346,9 +367,8 @@ extension VideoPlayer {
     /// - Parameters:
     ///   - time: The time at which to capture the snapshot
     ///   - completion: The block to invoke when the snapshot completes. Provides the image if no error occured.
-    @available(OSX 10.0, iOS 9.0, tvOS 9.0, *)
     open func snapshot(at time: CMTime? = nil, completion: ((_ image: Image?, _ error: Error?) -> Void)?) {
-        guard let asset = self.playerItem?.asset else {
+        guard let asset = playerItem?.asset else {
             completion?(nil, nil)
             return
         }
@@ -453,6 +473,9 @@ extension VideoPlayer {
     func updatePlayerItem(_ playerItem: AVPlayerItem?) {
         removePlayerItemObservers()
         
+        playerItem?.cancelPendingSeeks()
+        playerItem?.asset.cancelLoading()
+        
         guard let playerItem = playerItem else {
             self.playerItem = nil
             return
@@ -468,9 +491,9 @@ extension VideoPlayer {
         
         self.playerItem = playerItem
         
-        if let time = self._requestedSeekTime {
+        if let time = _requestedSeekTime {
             _requestedSeekTime = nil
-            self.seek(to: time)
+            seek(to: time)
         }
         
         player.actionAtItemEnd = actionAtEnd.action
@@ -481,28 +504,35 @@ extension VideoPlayer {
             pause()
         }
 
-        self.bufferingState = .unknown
+        bufferingState = .unknown
         
-        let asset = AVAsset(url: asset.url)
+        let avAsset = AVAsset(url: asset.url)
         let keys = ["tracks", "playable", "duration"]
 
-        asset.loadValuesAsynchronously(forKeys: keys) {
+        avAsset.loadValuesAsynchronously(forKeys: keys) { [weak self] in
+            guard let self = self else { return }
             
             for key in keys {
                 var error: NSError?
-                let status = asset.statusOfValue(forKey: key, error: &error)
+                let status = avAsset.statusOfValue(forKey: key, error: &error)
                 if status == .failed {
                     self.playbackState = .failed(.assetError(error))
                     return
                 }
             }
 
-            guard asset.isPlayable else {
+            guard avAsset.isPlayable else {
                 self.playbackState = .failed(.assetNotPlayable)
                 return
             }
+            
+            self.asset = asset
 
-            self.updatePlayerItem(AVPlayerItem(asset: asset))
+            self.updatePlayerItem({
+                let playerItem = AVPlayerItem(asset: avAsset)
+                playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
+                return playerItem
+            }())
         }
     }
     

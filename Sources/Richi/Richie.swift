@@ -11,33 +11,33 @@ import AVFoundation
 public struct Richi {
     
     public enum Gravity {
-        case fill
-        case aspectFit
         case aspectFill
+        case aspectFit
+        case fill
     }
     
     public enum PlaybackState: Equatable, CustomStringConvertible {
-        case stopped
-        case playing
-        case paused(_ reason: Richi.PausedReason)
         case failed(_ error: Richi.Error)
+        case paused
+        case playing
+        case stopped
 
         public var description: String {
             switch self {
-            case .stopped:
-                return "Stopped"
-            case .playing:
-                return "Playing"
             case .failed(let error):
                 return "Failed (\(error))"
-            case .paused(let reason):
-                return "Paused (\(reason))"
+            case .paused:
+                return "Paused"
+            case .playing:
+                return "Playing"
+            case .stopped:
+                return "Stopped"
             }
         }
         
         var isPausable: Bool {
             switch self {
-            case .paused(_): fallthrough
+            case .paused: fallthrough
             case .playing: return true
             case .failed(_): fallthrough
             case .stopped: return false
@@ -46,10 +46,10 @@ public struct Richi {
         
         public static func == (lhs: Richi.PlaybackState, rhs: Richi.PlaybackState) -> Bool {
             switch (lhs, rhs) {
-            case (.stopped, .stopped): return true
-            case (.playing, .playing): return true
             case (.failed, .failed): return true
             case (.paused, .paused): return true
+            case (.playing, .playing): return true
+            case (.stopped, .stopped): return true
             default: return false
             }
         }
@@ -58,6 +58,7 @@ public struct Richi {
     public enum PausedReason: CustomStringConvertible {
         case backgrounded
         case interrupted
+        case stopped
         case userInteraction
         case waitKeepUp
         
@@ -65,6 +66,7 @@ public struct Richi {
             switch self {
             case .backgrounded: return "Backgrounded"
             case .interrupted: return "Interrupted"
+            case .stopped: return "Stopped"
             case .userInteraction: return "User interaction"
             case .waitKeepUp: return "Waiting to keep up"
             }
@@ -90,7 +92,7 @@ public struct Richi {
         }
     }
     
-    public struct Asset {
+    public struct Asset: Equatable {
         public var url: URL
         public var headers: [String: String] = [:]
         

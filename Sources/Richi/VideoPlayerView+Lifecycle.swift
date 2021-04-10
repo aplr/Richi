@@ -81,7 +81,7 @@ extension VideoPlayer {
     @objc private func handleApplicationWillResignActive(_ notification: Notification) {
         // Pause the playback and note the pause reason if the application was
         // interrupted temporarily and the corresponding flag is set to `true`
-        if playbackState.isPausable && pauseWhenResigningActive {
+        if playbackState.isPausable, pauseWhenResigningActive {
             pause(reason: .interrupted)
         }
     }
@@ -89,15 +89,15 @@ extension VideoPlayer {
     @objc private func handleApplicationDidBecomeActive(_ notification: Notification) {
         // Resume playback if the player was paused because of a temporary
         // interruption and the corresponding flag is set
-        if case .paused(let reason) = playbackState, reason == .interrupted, resumeWhenBecomingActive {
-            playIfPossible()
+        if playbackState == .paused, pausedReason == .interrupted, resumeWhenBecomingActive {
+            autoPlay()
         }
     }
     
     @objc private func handleApplicationDidEnterBackground(_ notification: Notification) {
         // Pause the playback and note the pause reason if the application enters background,
         // the player is playing or was interrupted and the corresponding flag is set
-        if playbackState.isPausable && pauseWhenEnteringBackground {
+        if playbackState.isPausable, pauseWhenEnteringBackground {
             pause(reason: .backgrounded)
         }
     }
@@ -105,8 +105,8 @@ extension VideoPlayer {
     @objc private func handleApplicationWillEnterForeground(_ notification: Notification) {
         // Resume playback if the player was paused because the application was
         // sent to background before and the corresponding flag is set
-        if case .paused(let reason) = playbackState, reason == .backgrounded, resumeWhenEnteringForeground {
-            playIfPossible()
+        if playbackState == .paused, pausedReason == .backgrounded, resumeWhenEnteringForeground {
+            autoPlay()
         }
     }
     

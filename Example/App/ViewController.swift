@@ -37,9 +37,20 @@ class ViewController: UIViewController {
             videoPlayer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
+        view.addGestureRecognizer({
+            let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(playPause))
+            gestureRecognizer.numberOfTapsRequired = 1
+            gestureRecognizer.numberOfTouchesRequired = 1
+            return gestureRecognizer
+        }())
+        
         let videoURL = URL(string: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
         
         videoPlayer.load(asset: .init(url: videoURL))
+    }
+    
+    @objc private func playPause() {
+        videoPlayer.isPlaying.toggle()
     }
 }
 
@@ -47,7 +58,6 @@ extension ViewController: VideoPlayerDelegate {
     
     func playerReady(_ player: VideoPlayer) {
         print("Player Ready")
-        videoPlayer.play()
     }
     
     func player(_ player: VideoPlayer, didChangePlaybackStateFrom oldState: Richi.PlaybackState, to newState: Richi.PlaybackState) {
