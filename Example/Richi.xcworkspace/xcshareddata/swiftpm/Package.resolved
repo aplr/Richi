@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "PINCache",
+        "repositoryURL": "https://github.com/pinterest/PINCache.git",
+        "state": {
+          "branch": null,
+          "revision": "875c654984fb52b47ca65ae70d24852b0003ccd9",
+          "version": "3.0.3"
+        }
+      },
+      {
+        "package": "PINOperation",
+        "repositoryURL": "https://github.com/pinterest/PINOperation.git",
+        "state": {
+          "branch": null,
+          "revision": "44d8ca154a4e75a028a5548c31ff3a53b90cef15",
+          "version": "1.2.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
