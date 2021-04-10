@@ -1,4 +1,7 @@
-# Richi
+<h1>
+    <img src="./Logo.png" height="20" />
+    Richi
+</h1>
 
 Richi is an easy-to-use video player library written in Swift, with support for iOS, tvOS and macOS.
 It provides you a VideoPlayerView with a simple yet powerful API, which makes playing videos a joy on iOS and macOS.
