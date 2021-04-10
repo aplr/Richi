@@ -17,30 +17,6 @@ public typealias Image = UIImage
 
 import AVFoundation
 
-/// Player delegate protocol
-public protocol VideoPlayerDelegate: AnyObject {
-    func playerReady(_ player: VideoPlayer)
-    
-    func player(_ player: VideoPlayer, didChangePlaybackStateFrom oldState: Richi.PlaybackState, to newState: Richi.PlaybackState)
-    func player(_ player: VideoPlayer, didChangeBufferingStateFrom oldState: Richi.BufferingState, to newState: Richi.BufferingState)
-
-    // This is the time in seconds that the video has been buffered.
-    // If implementing a UIProgressView, user this value / player.maximumDuration to set progress.
-    func player(_ player: VideoPlayer, didChangeBufferTime bufferTime: Double)
-
-    func player(_ player: VideoPlayer, didFailWithError error: Richi.Error)
-    
-    func player(_ player: VideoPlayer, didLoadAsset asset: Richi.Asset)
-    func playerWillStartFromBeginning(_ player: VideoPlayer)
-    func playerDidEnd(_ player: VideoPlayer)
-    func playerWillLoop(_ player: VideoPlayer)
-    func playerDidLoop(_ player: VideoPlayer)
-}
-
-public protocol VideoPlayerTimeDelegate: AnyObject {
-    func player(_ player: VideoPlayer, didChangeCurrentTime time: TimeInterval)
-}
-
 public class VideoPlayer: View {
     
     #if !os(macOS)
@@ -87,20 +63,25 @@ public class VideoPlayer: View {
     }
     
     /// The current playback rate
-    open var rate: Float {
-        get { player.rate }
-        set { player.rate = newValue }
+    open var rate: Float = 1 {
+        didSet {
+            player.rate = rate
+        }
     }
     
     open var actionAtEnd: Richi.EndAction = .pause
     
-    /// Controls if playback is paused when the application is no longer active
+    /// Controls if playback is paused when the application is no longer active.
+    /// This is because of temporary interruptions such as incoming phone calls,
+    /// messages or when the app is backgrounded by the user.
     open var pauseWhenResigningActive: Bool = true
     
-    /// Controls if playback is paused when the application enters the background
+    /// Controls if playback is paused when the application enters the background.
+    /// This is triggered by the user sending the app to the background or locking the device.
     open var pauseWhenEnteringBackground: Bool = true
     
-    /// Controls if playback is resumed when the application has become active
+    /// Controls if playback is resumed when the application has become active.
+    /// Playback will be resumed only if the player was paused because of some temporary interruption.
     open var resumeWhenBecomingActive: Bool = false
     
     /// Controls if playback is resumed when the application is about to enter the foreground
@@ -201,12 +182,12 @@ public class VideoPlayer: View {
         set { player.replaceCurrentItem(with: newValue) }
     }
     
-    init() {
+    public init() {
         super.init(frame: .zero)
         commonSetup()
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonSetup()
     }
@@ -308,11 +289,11 @@ extension VideoPlayer {
     }
     
     /// Pauses playback of the current asset
-    open func pause() {
-        guard playbackState == .playing else { return }
+    open func pause(reason: Richi.PausedReason = .userInteraction) {
+        guard playbackState.isPausable else { return }
 
         player.pause()
-        playbackState = .paused
+        playbackState = .paused(reason)
     }
     
     /// Stops playback of the current asset.
@@ -483,14 +464,14 @@ extension VideoPlayer {
             playerItem.preferredMaximumResolution = _preferredMaximumResolution
         }
         
-        if let seek = self._requestedSeekTime {
-            _requestedSeekTime = nil
-            self.seek(to: seek)
-        }
-        
-        addPlayerItemObservers()
+        addPlayerItemObservers(to: playerItem)
         
         self.playerItem = playerItem
+        
+        if let time = self._requestedSeekTime {
+            _requestedSeekTime = nil
+            self.seek(to: time)
+        }
         
         player.actionAtItemEnd = actionAtEnd.action
     }

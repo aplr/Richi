@@ -42,7 +42,7 @@ extension VideoPlayer {
                 player.observe(\.timeControlStatus, options: [.new, .old]) { [weak self] (object, change) in
                     switch object.timeControlStatus {
                     case .paused:
-                        self?.playbackState = .paused
+                        self?.playbackState = .paused(.waitKeepUp)
                     case .playing:
                         self?.playbackState = .playing
                     case .waitingToPlayAtSpecifiedRate:
@@ -68,8 +68,7 @@ extension VideoPlayer {
 
 extension VideoPlayer {
     
-    func addPlayerItemObservers() {
-        guard let playerItem = playerItem else { return }
+    func addPlayerItemObservers(to playerItem: AVPlayerItem) {
         
         NotificationCenter.default.addObserver(
             self,

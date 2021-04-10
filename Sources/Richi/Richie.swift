@@ -19,7 +19,7 @@ public struct Richi {
     public enum PlaybackState: Equatable, CustomStringConvertible {
         case stopped
         case playing
-        case paused
+        case paused(_ reason: Richi.PausedReason)
         case failed(_ error: Richi.Error)
 
         public var description: String {
@@ -29,9 +29,18 @@ public struct Richi {
             case .playing:
                 return "Playing"
             case .failed(let error):
-                return "Failed \(error)"
-            case .paused:
-                return "Paused"
+                return "Failed (\(error))"
+            case .paused(let reason):
+                return "Paused (\(reason))"
+            }
+        }
+        
+        var isPausable: Bool {
+            switch self {
+            case .paused(_): fallthrough
+            case .playing: return true
+            case .failed(_): fallthrough
+            case .stopped: return false
             }
         }
         
@@ -42,6 +51,22 @@ public struct Richi {
             case (.failed, .failed): return true
             case (.paused, .paused): return true
             default: return false
+            }
+        }
+    }
+    
+    public enum PausedReason: CustomStringConvertible {
+        case backgrounded
+        case interrupted
+        case userInteraction
+        case waitKeepUp
+        
+        public var description: String {
+            switch self {
+            case .backgrounded: return "Backgrounded"
+            case .interrupted: return "Interrupted"
+            case .userInteraction: return "User interaction"
+            case .waitKeepUp: return "Waiting to keep up"
             }
         }
     }
@@ -66,8 +91,13 @@ public struct Richi {
     }
     
     public struct Asset {
-        var url: URL
-        var headers: [String: String] = [:]
+        public var url: URL
+        public var headers: [String: String] = [:]
+        
+        public init(url: URL, headers: [String : String] = [:]) {
+            self.url = url
+            self.headers = headers
+        }
     }
     
     public enum EndAction {
