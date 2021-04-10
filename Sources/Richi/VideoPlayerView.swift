@@ -19,23 +19,9 @@ import AVFoundation
 
 public class VideoPlayer: View {
     
-    #if !os(macOS)
-    public override class var layerClass: AnyClass {
-        AVPlayerLayer.self
-    }
-    #endif
+    // MARK: - Public Properties
     
-    var playerLayer: AVPlayerLayer {
-        layer as! AVPlayerLayer
-    }
-    
-    lazy var player: AVPlayer = {
-        let player = AVPlayer()
-        player.actionAtItemEnd = .none
-        return player
-    }()
-    
-    public var gravity: Richi.Gravity {
+    open var gravity: Richi.Gravity {
         get { Richi.Gravity(videoGravity: playerLayer.videoGravity) }
         set { playerLayer.videoGravity = newValue.videoGravity }
     }
@@ -75,6 +61,7 @@ public class VideoPlayer: View {
         }
     }
     
+    /// The action to perform when the current player item has finished playing.
     open var actionAtEnd: Richi.EndAction = .pause
     
     /// Controls if playback is paused when the application is no longer active.
@@ -93,10 +80,11 @@ public class VideoPlayer: View {
     /// Controls if playback is resumed when the application is about to enter the foreground
     open var resumeWhenEnteringForeground: Bool = false
     
-    var pausedReason: Richi.PausedReason = .waitKeepUp
+    /// The current asset
+    open internal(set) var asset: Richi.Asset?
     
     /// Current playback state of the Player
-    var playbackState: Richi.PlaybackState = .stopped {
+    open internal(set) var playbackState: Richi.PlaybackState = .stopped {
         didSet {
             if playbackState != oldValue {
                 runOnMainLoop { self.playbackStateDidChange(from: oldValue) }
@@ -105,7 +93,7 @@ public class VideoPlayer: View {
     }
     
     /// Current buffering state of the Player
-    open var bufferingState: Richi.BufferingState = .unknown {
+    open internal(set) var bufferingState: Richi.BufferingState = .unknown {
         didSet {
             if bufferingState != oldValue {
                 runOnMainLoop { self.bufferingStateDidChange(from: oldValue) }
@@ -169,6 +157,22 @@ public class VideoPlayer: View {
         }
     }
     
+    #if !os(macOS)
+    public override class var layerClass: AnyClass {
+        AVPlayerLayer.self
+    }
+    #endif
+    
+    var playerLayer: AVPlayerLayer {
+        layer as! AVPlayerLayer
+    }
+    
+    lazy var player: AVPlayer = {
+        let player = AVPlayer()
+        player.actionAtItemEnd = .none
+        return player
+    }()
+    
     // Observers
     var playerTimeObserver: Any?
     var playerObservers: [NSKeyValueObservation] = []
@@ -181,8 +185,7 @@ public class VideoPlayer: View {
     var _preferredPeakBitRate: Double = 0
     var _preferredMaximumResolution: CGSize = .zero
     
-    /// The current asset
-    open var asset: Richi.Asset?
+    var pausedReason: Richi.PausedReason = .waitKeepUp
     
     /// The current player item
     var playerItem: AVPlayerItem? {
@@ -222,31 +225,6 @@ public class VideoPlayer: View {
     
     private func bufferingStateDidChange(from oldValue: Richi.BufferingState) {
         delegate?.player(self, didChangeBufferingStateFrom: oldValue, to: bufferingState)
-    }
-    
-    func didPlayToEndTime() {
-        if actionAtEnd == .loop {
-            // Notify the delegate that the player is about to loop
-            delegate?.playerWillLoop(self)
-            // Seek to the start and play
-            playFromBeginning()
-            // Notify the delegate that the player has looped
-            delegate?.playerDidLoop(self)
-        } else if actionAtEnd == .freeze {
-            // Stop playing at the end
-            stop()
-        } else {
-            // Seek to the start and stop
-            player.seek(to: .zero) { _ in self.stop() }
-        }
-    }
-    
-    func runOnMainLoop(_ closure: @escaping () -> Void) {
-        if Thread.isMainThread {
-            closure()
-        } else {
-            DispatchQueue.main.async(execute: closure)
-        }
     }
 }
 
@@ -535,7 +513,20 @@ extension VideoPlayer {
             }())
         }
     }
+}
+
+
+// MARK: - Utility
+
+extension VideoPlayer {
     
+    func runOnMainLoop(_ closure: @escaping () -> Void) {
+        if Thread.isMainThread {
+            closure()
+        } else {
+            DispatchQueue.main.async(execute: closure)
+        }
+    }
 }
 
 extension Richi.Gravity {

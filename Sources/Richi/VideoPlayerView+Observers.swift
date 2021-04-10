@@ -167,6 +167,23 @@ extension VideoPlayer {
             self.autoPlay()
         }
     }
+    
+    func didPlayToEndTime() {
+        if actionAtEnd == .loop {
+            // Notify the delegate that the player is about to loop
+            delegate?.playerWillLoop(self)
+            // Seek to the start and play
+            playFromBeginning()
+            // Notify the delegate that the player has looped
+            delegate?.playerDidLoop(self)
+        } else if actionAtEnd == .freeze {
+            // Stop playing at the end
+            stop()
+        } else {
+            // Seek to the start and stop
+            player.seek(to: .zero) { _ in self.stop() }
+        }
+    }
 }
 
 // MARK: - Player Layer Observers

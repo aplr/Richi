@@ -22,8 +22,25 @@ class ViewController: UIViewController {
         return view
     }()
     
+    private lazy var singleTapGestureRecognizer: UITapGestureRecognizer = {
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(playPause))
+        gestureRecognizer.numberOfTapsRequired = 1
+        gestureRecognizer.require(toFail: doubleTapGestureRecognizer)
+        return gestureRecognizer
+    }()
+    
+    private lazy var doubleTapGestureRecognizer: UITapGestureRecognizer = {
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(zoom))
+        gestureRecognizer.numberOfTapsRequired = 2
+        return gestureRecognizer
+    }()
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
+    }
+    
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        UIDevice.current.orientation.isLandscape
     }
 
     override func viewDidLoad() {
@@ -31,26 +48,49 @@ class ViewController: UIViewController {
         
         view.addSubview(videoPlayer)
         view.addConstraints([
-            videoPlayer.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            videoPlayer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            videoPlayer.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            videoPlayer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            videoPlayer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            videoPlayer.topAnchor.constraint(equalTo: view.topAnchor),
+            videoPlayer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            videoPlayer.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        view.addGestureRecognizer({
-            let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(playPause))
-            gestureRecognizer.numberOfTapsRequired = 1
-            gestureRecognizer.numberOfTouchesRequired = 1
-            return gestureRecognizer
-        }())
+        view.addGestureRecognizer(doubleTapGestureRecognizer)
+        view.addGestureRecognizer(singleTapGestureRecognizer)
         
         let videoURL = URL(string: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
         
         videoPlayer.load(asset: .init(url: videoURL))
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(deviceDidRotate),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     @objc private func playPause() {
         videoPlayer.isPlaying.toggle()
+    }
+    
+    @objc private func zoom() {
+        videoPlayer.gravity = videoPlayer.gravity == .aspectFill ? .aspectFit : .aspectFill
+    }
+    
+    @objc private func deviceDidRotate() {
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
     }
 }
 
