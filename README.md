@@ -1,5 +1,5 @@
 <h1>
-    <img src="./Logo.png" height="20" />
+    <img src="./Logo.png" height="23" />
     Richi
 </h1>
 
