@@ -11,14 +11,11 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        build_args:
-        - -Xswiftc "-sdk" -Xswiftc `xcrun --sdk macosx --show-sdk-path`
-        - -Xswiftc "-sdk" -Xswiftc `xcrun --sdk iphonesimulator --show-sdk-path` -Xswiftc "-target" -Xswiftc "x86_64-apple-ios14.5-simulator"
-        - -Xswiftc "-sdk" -Xswiftc `xcrun --sdk appletvsimulator --show-sdk-path` -Xswiftc "-target" -Xswiftc "x86_64-apple-tvos14.5-simulator"
+        sdk: [macosx, iphonesimulator, appletvsimulator]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build
-      run: swift build -v -Xswiftc "-swift-version" -Xswiftc 5 ${build_args}
+      run: swift build -v -Xswiftc "-swift-version" -Xswiftc 5 -Xswiftc "-sdk" -Xswiftc `xcrun --sdk ${sdk} --show-sdk-path`
       env:
-        build_args: ${{ matrix.build_args }}
+        sdk: ${{ matrix.sdk }}
