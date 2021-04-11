@@ -11,9 +11,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Generate Documentation
-      run: sudo gem install jazzy && jazzy
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v1
+      run: sudo gem install jazzy && jazzy -o build
+    - name: Deploy Documentation
+      uses: JamesIves/github-pages-deploy-action@4.1.1
       with:
-        name: docs
-        path: docs/
+        branch: gh-pages
+        folder: build
