@@ -5,27 +5,29 @@
 //  Created by Andreas Pfurtscheller on 07.04.21.
 //
 
-#if os(macOS)
+#if canImport(AppKit)
 import AppKit
-public typealias View = NSView
-public typealias Image = NSImage
-#else
+/// :nodoc:
+public typealias UIView = NSView
+/// :nodoc:
+public typealias UIImage = NSImage
+#elseif canImport(UIKit)
 import UIKit
-public typealias View = UIView
-public typealias Image = UIImage
 #endif
 
 import AVFoundation
 
-public class VideoPlayer: View {
-    
+/// An object that displays a single video asset or a playlist of video assets in your interface.
+public class VideoPlayer: UIView {
+
     // MARK: - Public Properties
-    
+
+    /// A value that specifies how the video is displayed within the view's bounds.
     open var gravity: Richi.Gravity {
         get { Richi.Gravity(videoGravity: playerLayer.videoGravity) }
         set { playerLayer.videoGravity = newValue.videoGravity }
     }
-    
+
     /// Determines if the video should autoplay
     open var autoplay: Bool = true
 
@@ -34,55 +36,57 @@ public class VideoPlayer: View {
         get { player.volume }
         set { player.volume = newValue }
     }
-    
+
     /// A Boolean value that indicates whether the audio output of the player is muted.
     open var isMuted: Bool {
         get { player.isMuted }
         set { player.isMuted = newValue }
     }
-    
+
     /// A Boolean value that indicates whether video playback prevents display and device sleep.
     @available(OSX 10.14, iOS 12.0, tvOS 12.0, *)
     open var preventsDisplaySleepDuringPlayback: Bool {
         get { player.preventsDisplaySleepDuringVideoPlayback }
         set { player.preventsDisplaySleepDuringVideoPlayback = newValue }
     }
-    
+
     /// A boolean value that indicates whether video playback is playing
     open var isPlaying: Bool {
         get { playbackState == .playing }
         set { play(newValue) }
     }
-    
+
     /// The current playback rate
     open var rate: Float = 1 {
         didSet {
             player.rate = rate
         }
     }
-    
+
     /// The action to perform when the current player item has finished playing.
     open var actionAtEnd: Richi.EndAction = .pause
-    
+
+    // MARK: - Control Lifecycle Behavior
+
     /// Controls if playback is paused when the application is no longer active.
     /// This is because of temporary interruptions such as incoming phone calls,
     /// messages or when the app is backgrounded by the user.
     open var pauseWhenResigningActive: Bool = true
-    
+
     /// Controls if playback is paused when the application enters the background.
     /// This is triggered by the user sending the app to the background or locking the device.
     open var pauseWhenEnteringBackground: Bool = true
-    
+
     /// Controls if playback is resumed when the application has become active.
     /// Playback will be resumed only if the player was paused because of some temporary interruption.
     open var resumeWhenBecomingActive: Bool = false
-    
+
     /// Controls if playback is resumed when the application is about to enter the foreground
     open var resumeWhenEnteringForeground: Bool = false
-    
+
     /// The current asset
     open internal(set) var asset: Richi.Asset?
-    
+
     /// Current playback state of the Player
     open internal(set) var playbackState: Richi.PlaybackState = .stopped {
         didSet {
@@ -91,7 +95,7 @@ public class VideoPlayer: View {
             }
         }
     }
-    
+
     /// Current buffering state of the Player
     open internal(set) var bufferingState: Richi.BufferingState = .unknown {
         didSet {
@@ -100,25 +104,25 @@ public class VideoPlayer: View {
             }
         }
     }
-    
+
     /// Maximum duration of playback.
     open var duration: TimeInterval {
         guard let playerItem = playerItem else {
             return CMTime.indefinite.seconds
         }
-        
+
         return playerItem.duration.seconds
     }
-    
+
     /// Media playback's current time.
     open var currentTime: CMTime {
         guard let playerItem = playerItem else {
             return .indefinite
         }
-        
+
         return playerItem.currentTime()
     }
-    
+
     /// Indicates the desired limit of network bandwidth consumption for this item.
     open var preferredPeakBitRate: Double {
         get { playerItem?.preferredPeakBitRate ?? 0 }
@@ -127,7 +131,7 @@ public class VideoPlayer: View {
             _preferredPeakBitRate = newValue
         }
     }
-    
+
     /// Indicates a preferred upper limit on the resolution of the video to be downloaded.
     @available(OSX 10.13, iOS 11.0, tvOS 11.0, *)
     open var preferredMaximumResolution: CGSize {
@@ -137,102 +141,113 @@ public class VideoPlayer: View {
             _preferredMaximumResolution = newValue
         }
     }
-    
+
     /// Media playback's current time interval in seconds.
     open var currentDuration: TimeInterval {
         currentTime.seconds
     }
-    
-    // Delegates
+
+    /// The object that acts as the delegate of the video player view
     open weak var delegate: VideoPlayerDelegate?
+
+    /// The object that acts as the time delegate of the video player view
     open weak var timeDelegate: VideoPlayerTimeDelegate? {
         didSet {
             updateInternalTimeObserver()
         }
     }
-    
+
+    /// The time interval at which time observers should
+    /// notify the progress of the player’s current time.
     open var timeObserverInterval: TimeInterval = 10 {
         didSet {
             updateInternalTimeObserver()
         }
     }
-    
-    #if !os(macOS)
+
+    #if canImport(UIKit)
+    /// :nodoc:
     public override class var layerClass: AnyClass {
         AVPlayerLayer.self
     }
     #endif
-    
+
     var playerLayer: AVPlayerLayer {
         layer as! AVPlayerLayer
     }
-    
+
     lazy var player: AVPlayer = {
         let player = AVPlayer()
         player.actionAtItemEnd = .none
         return player
     }()
-    
+
     // Observers
     var playerTimeObserver: Any?
     var playerObservers: [NSKeyValueObservation] = []
     var playerItemObservers: [NSKeyValueObservation] = []
     var playerLayerObserver: NSKeyValueObservation?
-    
+
     // Hidden vars
     var _lastBufferTime: Double = 0
     var _requestedSeekTime: CMTime?
     var _preferredPeakBitRate: Double = 0
     var _preferredMaximumResolution: CGSize = .zero
-    
+
     var pausedReason: Richi.PausedReason = .waitKeepUp
-    
+
     /// The current player item
     var playerItem: AVPlayerItem? {
         get { player.currentItem }
         set { player.replaceCurrentItem(with: newValue) }
     }
+
+    // MARK: - Creating a Video Player
     
+    /// Initializes and returns a newly allocated player view object with a zero rect frame.
     public init() {
         super.init(frame: .zero)
         commonSetup()
     }
     
+    /// Initializes and returns a newly allocated player view object from the specified coder.
+    ///
+    /// - Parameter coder: The coder object
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonSetup()
     }
-    
+
     private func commonSetup() {
-        #if os(macOS)
+        #if canImport(AppKit)
         wantsLayer = true
         layer = AVPlayerLayer()
         #endif
-        
+
         playerLayer.player = player
         addPlayerObservers()
         addPlayerLayerObservers()
         addLifecycleObservers()
     }
-    
+
     private func playbackStateDidChange(from oldValue: Richi.PlaybackState) {
         if case let .failed(error) = playbackState {
             delegate?.player(self, didFailWithError: error)
         }
-        
+
         delegate?.player(self, didChangePlaybackStateFrom: oldValue, to: playbackState)
     }
-    
+
     private func bufferingStateDidChange(from oldValue: Richi.BufferingState) {
         delegate?.player(self, didChangeBufferingStateFrom: oldValue, to: bufferingState)
     }
 }
 
 
-// MARK: - Actions
+// MARK: - Managing the Current Asset
 
 extension VideoPlayer {
-    
+
     /// Loads the given asset and prepares the player.
     /// With autoplay enabled, the asset will be played
     /// automatically as soon as the player is ready.
@@ -241,12 +256,12 @@ extension VideoPlayer {
     open func load(asset: Richi.Asset) {
         // Do nothing if the asset did not change
         guard asset != self.asset else { return }
-        
+
         // Stop the player before loading a new asset
         if playbackState == .playing {
             stop()
         }
-        
+
         playbackState = .stopped
         pausedReason = .waitKeepUp
 
@@ -254,14 +269,19 @@ extension VideoPlayer {
 
         updateAsset(asset)
     }
-    
+}
+
+
+// MARK: - Controlling Playback
+
+extension VideoPlayer {
+
     /// Plays the current asset from the beginning
     open func playFromBeginning() {
         delegate?.playerWillStartFromBeginning(self)
         player.seek(to: .zero) { _ in self.play() }
     }
 
-    
     /// Continues playing the current asset if `shouldPlay` is `true`,
     /// pauses playback otherwise.
     /// - Parameter shouldPlay: Indicates if the player should play or pause
@@ -270,13 +290,13 @@ extension VideoPlayer {
             pause(reason: .userInteraction)
             return
         }
-        
+
         // The only reason the player pauses itself after we initiated play
         // is that it can't keep up with buffering the data.
         pausedReason = .waitKeepUp
         player.playImmediately(atRate: rate)
     }
-    
+
     /// Continues playing the current asset if autoplay is enabled
     func autoPlay() {
         guard autoplay else { return }
@@ -284,13 +304,19 @@ extension VideoPlayer {
     }
     
     /// Pauses playback of the current asset
-    open func pause(reason: Richi.PausedReason = .userInteraction) {
+    open func pause() {
+        pause(reason: .userInteraction)
+    }
+
+    /// Pauses playback of the current asset
+    /// while also updating the paused reason
+    func pause(reason: Richi.PausedReason) {
         guard playbackState.isPausable else { return }
 
         pausedReason = reason
         player.pause()
     }
-    
+
     /// Stops playback of the current asset.
     open func stop() {
         if playbackState == .stopped { return }
@@ -300,7 +326,13 @@ extension VideoPlayer {
         playbackState = .stopped
         delegate?.playerDidEnd(self)
     }
-    
+}
+
+
+// MARK: - Seeking through Media
+
+extension VideoPlayer {
+
     /// Sets the current playback time to the specified time and executes the specified block when the seek operation completes or is interrupted.
     /// - Parameters:
     ///   - time: The time to which to seek.
@@ -312,7 +344,7 @@ extension VideoPlayer {
             _requestedSeekTime = time
         }
     }
-    
+
     /// Sets the current playback time within a specified time bound and invokes the specified block when the seek operation completes or is interrupted.
     ///
     /// - Parameters:
@@ -330,7 +362,7 @@ extension VideoPlayer {
             _requestedSeekTime = time
             return
         }
-        
+
         playerItem.seek(
             to: time,
             toleranceBefore: toleranceBefore,
@@ -338,22 +370,22 @@ extension VideoPlayer {
             completionHandler: completionHandler
         )
     }
-    
+
     /// Captures a snapshot of the current media at the specified time.
     /// If time is nil, the current time will be used.
     ///
     /// - Parameters:
     ///   - time: The time at which to capture the snapshot
     ///   - completion: The block to invoke when the snapshot completes. Provides the image if no error occured.
-    open func snapshot(at time: CMTime? = nil, completion: ((_ image: Image?, _ error: Error?) -> Void)?) {
+    open func snapshot(at time: CMTime? = nil, completion: ((_ image: UIImage?, _ error: Error?) -> Void)?) {
         guard let asset = playerItem?.asset else {
             completion?(nil, nil)
             return
         }
-        
+
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.appliesPreferredTrackTransform = true
-        
+
         let snapshotTime = time ?? currentTime
 
         imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: snapshotTime)]) { (requestedTime, image, actualTime, result, error) in
@@ -363,13 +395,13 @@ extension VideoPlayer {
                 }
                 return
             }
-            
+
             switch result {
             case .succeeded:
-                #if os(macOS)
-                let image = Image(cgImage: image, size: CGSize(width: image.width, height: image.height))
+                #if canImport(AppKit)
+                let image = UIImage(cgImage: image, size: CGSize(width: image.width, height: image.height))
                 #else
-                let image = Image(cgImage: image)
+                let image = UIImage(cgImage: image)
                 #endif
                 DispatchQueue.main.async {
                     completion?(image, nil)
@@ -386,10 +418,10 @@ extension VideoPlayer {
 }
 
 
-// MARK: - Time Observers
+// MARK: - Observing Player Time
 
 extension VideoPlayer {
-    
+
     /// Requests the invocation of a block when specified times are traversed during normal playback.
     ///
     /// - Parameters:
@@ -410,7 +442,7 @@ extension VideoPlayer {
             using: block
         )
     }
-    
+
     /// Requests the periodic invocation of a given block during playback to report changing time.
     ///
     /// - Parameters:
@@ -432,7 +464,7 @@ extension VideoPlayer {
             using: block
         )
     }
-    
+
     /// Cancels a previously registered periodic or boundary time observer.
     ///
     /// - Parameter observer: An object returned by a previous call to addPeriodicTimeObserver(forInterval:queue:using:)
@@ -440,56 +472,55 @@ extension VideoPlayer {
     open func removeTimeObserver(_ observer: Any) {
         player.removeTimeObserver(observer)
     }
-    
 }
 
 
 // MARK: - Player Item Loading
 
 extension VideoPlayer {
-    
+
     func updatePlayerItem(_ playerItem: AVPlayerItem?) {
         removePlayerItemObservers()
-        
+
         playerItem?.cancelPendingSeeks()
         playerItem?.asset.cancelLoading()
-        
+
         guard let playerItem = playerItem else {
             self.playerItem = nil
             return
         }
-        
+
         playerItem.audioTimePitchAlgorithm = .spectral
         playerItem.preferredPeakBitRate = _preferredPeakBitRate
         if #available(OSX 10.13, iOS 11.0, tvOS 11.0, *) {
             playerItem.preferredMaximumResolution = _preferredMaximumResolution
         }
-        
+
         addPlayerItemObservers(to: playerItem)
-        
+
         self.playerItem = playerItem
-        
+
         if let time = _requestedSeekTime {
             _requestedSeekTime = nil
             seek(to: time)
         }
-        
+
         player.actionAtItemEnd = actionAtEnd.action
     }
-    
+
     func updateAsset(_ asset: Richi.Asset) {
         if playbackState == .playing {
             pause()
         }
 
         bufferingState = .unknown
-        
+
         let avAsset = AVAsset(url: asset.url)
         let keys = ["tracks", "playable", "duration"]
 
         avAsset.loadValuesAsynchronously(forKeys: keys) { [weak self] in
             guard let self = self else { return }
-            
+
             for key in keys {
                 var error: NSError?
                 let status = avAsset.statusOfValue(forKey: key, error: &error)
@@ -503,7 +534,7 @@ extension VideoPlayer {
                 self.playbackState = .failed(.assetNotPlayable)
                 return
             }
-            
+
             self.asset = asset
 
             self.updatePlayerItem({
@@ -519,7 +550,7 @@ extension VideoPlayer {
 // MARK: - Utility
 
 extension VideoPlayer {
-    
+
     func runOnMainLoop(_ closure: @escaping () -> Void) {
         if Thread.isMainThread {
             closure()
@@ -530,7 +561,7 @@ extension VideoPlayer {
 }
 
 extension Richi.Gravity {
-    
+
     init(videoGravity: AVLayerVideoGravity) {
         switch videoGravity {
         case .resize: self = .fill
@@ -539,7 +570,7 @@ extension Richi.Gravity {
         default: self = .fill
         }
     }
-    
+
     var videoGravity: AVLayerVideoGravity {
         switch self {
         case .aspectFill: return .resizeAspectFill
@@ -550,7 +581,7 @@ extension Richi.Gravity {
 }
 
 extension Richi.EndAction {
-    
+
     var action: AVPlayer.ActionAtItemEnd {
         switch self {
         // case .advance: return .advance

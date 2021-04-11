@@ -11,7 +11,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Generate Documentation
-      run: sudo gem install jazzy && jazzy -o build
+      run: sudo gem install jazzy && ./build_docs.sh
     - name: Deploy Documentation
       uses: JamesIves/github-pages-deploy-action@4.1.1
       with:

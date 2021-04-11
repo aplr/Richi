@@ -1,5 +1,5 @@
 <h1>
-    <img src="./Logo.png" height="23" />
+    <img src="https://raw.githubusercontent.com/aplr/Richi/main/Logo.png?token=AAIAWBDVTXVU2WU3NM5UJMDAPPZA4" height="23" />
     Richi
 </h1>
 
