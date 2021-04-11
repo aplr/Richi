@@ -100,15 +100,24 @@ public struct Richi {
 
         /// Headers to be sent with the request to the given URL
         public var headers: [String: String] = [:]
+        
+        /// Mime type of the asset
+        public var mimeType: String? = nil
 
         /// Creates a new asset object that models the media at the specified URL.
         ///
         /// - Parameters:
         ///   - url: A URL to a local, remote, or HTTP Live Streaming media resource.
         ///   - headers: Headers to be sent with the request to the given URL
-        public init(url: URL, headers: [String : String] = [:]) {
+        ///   - mimeType: Mime type of the asset
+        public init(
+            url: URL,
+            headers: [String : String] = [:],
+            mimeType: String? = nil
+        ) {
             self.url = url
             self.headers = headers
+            self.mimeType = mimeType
         }
     }
 

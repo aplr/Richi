@@ -515,7 +515,7 @@ extension VideoPlayer {
 
         bufferingState = .unknown
 
-        let avAsset = AVAsset(url: asset.url)
+        let avAsset = makeAVAsset(from: asset)
         let keys = ["tracks", "playable", "duration"]
 
         avAsset.loadValuesAsynchronously(forKeys: keys) { [weak self] in
@@ -543,6 +543,16 @@ extension VideoPlayer {
                 return playerItem
             }())
         }
+    }
+    
+    func makeAVAsset(from asset: Richi.Asset) -> AVAsset {
+        var options: [String: Any] = [
+            "AVURLAssetHTTPHeaderFieldsKey": asset.headers
+        ]
+        if let mimeType = asset.mimeType {
+            options["AVURLAssetOutOfBandMIMETypeKey"] = mimeType
+        }
+        return AVURLAsset(url: asset.url, options: options)
     }
 }
 
