@@ -5,8 +5,13 @@
 //  Created by Andreas Pfurtscheller on 10.04.21.
 //
 
-import UIKit
 import Foundation
+
+#if canImport(AppKit)
+import AppKit
+#elseif canImport(UIKit)
+import UIKit
+#endif
 
 
 /// A set of methods which allow to respond to video player events.

@@ -211,11 +211,13 @@ public class VideoPlayer: UIView {
         set { player.replaceCurrentItem(with: newValue) }
     }
     
+    #if canImport(UIKit)
     public override var contentMode: UIView.ContentMode {
         didSet {
             gravity = Richi.Gravity(contentMode: contentMode)
         }
     }
+    #endif
 
     // MARK: - Creating a Video Player
     
@@ -596,6 +598,7 @@ extension Richi.Gravity {
         }
     }
     
+    #if canImport(UIKit)
     init(contentMode: UIView.ContentMode) {
         switch contentMode {
         case .scaleAspectFill: self = .aspectFill
@@ -604,6 +607,7 @@ extension Richi.Gravity {
         default: self = .fill
         }
     }
+    #endif
 
     var videoGravity: AVLayerVideoGravity {
         switch self {
