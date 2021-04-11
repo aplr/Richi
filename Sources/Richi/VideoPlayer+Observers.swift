@@ -117,11 +117,21 @@ extension VideoPlayer {
         )
 
         playerItemObservers.append(
-            playerItem.observe(\.loadedTimeRanges, options: [.new, .old]) { [weak self] (object, change) in
+            playerItem.observe(\.loadedTimeRanges, options: [.new, .old]) { [weak self] (playerItem, change) in
                 guard let self = self else { return }
 
                 self.bufferDidChange()
             }
+        )
+        
+        playerItemObservers.append(
+            playerItem.observe(\.presentationSize, options: [.new, .old], changeHandler: { [weak self] (playerItem, change) in
+                guard let self = self else { return }
+                
+                self.runOnMainLoop {
+                    self.delegate?.player(self, didChangeVideoSize: change.newValue ?? .zero)
+                }
+            })
         )
     }
     

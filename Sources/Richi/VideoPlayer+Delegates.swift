@@ -5,6 +5,7 @@
 //  Created by Andreas Pfurtscheller on 10.04.21.
 //
 
+import UIKit
 import Foundation
 
 
@@ -51,6 +52,13 @@ public protocol VideoPlayerDelegate: AnyObject {
     ///   - player: The player object
     ///   - asset: The video asset which has been loaded
     func player(_ player: VideoPlayer, didLoadAsset asset: Richi.Asset)
+    
+    /// Tells the delegate that the video size of the current asset has changed.
+    ///
+    /// - Parameters:
+    ///   - player: The player object
+    ///   - size: The video asset's size
+    func player(_ player: VideoPlayer, didChangeVideoSize size: CGSize)
     
     /// Tells the delegate that the player will start playback from the beginning.
     ///
@@ -106,6 +114,10 @@ public extension VideoPlayerDelegate {
     }
     
     func player(_ player: VideoPlayer, didLoadAsset asset: Richi.Asset) {
+        
+    }
+    
+    func player(_ player: VideoPlayer, didChangeVideoSize size: CGSize) {
         
     }
     

@@ -104,6 +104,15 @@ public class VideoPlayer: UIView {
             }
         }
     }
+    
+    /// The size of the current video asset.
+    open var videoSize: CGSize {
+        guard let playerItem = playerItem else {
+            return .zero
+        }
+        
+        return playerItem.presentationSize
+    }
 
     /// Maximum duration of playback.
     open var duration: TimeInterval {
@@ -200,6 +209,12 @@ public class VideoPlayer: UIView {
     var playerItem: AVPlayerItem? {
         get { player.currentItem }
         set { player.replaceCurrentItem(with: newValue) }
+    }
+    
+    public override var contentMode: UIView.ContentMode {
+        didSet {
+            gravity = Richi.Gravity(contentMode: contentMode)
+        }
     }
 
     // MARK: - Creating a Video Player
@@ -577,6 +592,15 @@ extension Richi.Gravity {
         case .resize: self = .fill
         case .resizeAspect: self = .aspectFit
         case .resizeAspectFill: self = .aspectFill
+        default: self = .fill
+        }
+    }
+    
+    init(contentMode: UIView.ContentMode) {
+        switch contentMode {
+        case .scaleAspectFill: self = .aspectFill
+        case .scaleAspectFit: self = .aspectFit
+        case .scaleToFill: fallthrough
         default: self = .fill
         }
     }
