@@ -32,7 +32,7 @@ Once you have your Swift package set up, adding Richi as a dependency is as easy
 dependencies: [
     .package(
         url: "https://github.com/aplr/Richi.git",
-        .upToNextMajor(from: "1.0")
+        .upToNextMajor(from: "1.0.0")
     )
 ]
 ```
