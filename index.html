@@ -106,8 +106,12 @@
     Richi
 </h1>
 
+<p><img src="https://github.com/aplr/Richi/workflows/Build/badge.svg?branch=main" alt="Build">
+<img src="https://github.com/aplr/Richi/workflows/Documentation/badge.svg" alt="Documentation"></p>
+
 <p>Richi is an easy-to-use video player library written in Swift, with support for iOS, tvOS and macOS.
 It provides you a VideoPlayer view with a simple yet powerful API, which makes playing videos a joy on iOS and macOS.</p>
+<h2 id='features' class='heading'>Features</h2>
 
 <p>Richi builds on top of AVPlayer and aims at simplifying its interface, while providing additional features such as:</p>
 
@@ -119,6 +123,61 @@ It provides you a VideoPlayer view with a simple yet powerful API, which makes p
 ► Video snapshots</p>
 
 <p>This library does <strong>NOT</strong> provide any video player UI in order to keep it as lightweight as possible, while making it highly flexible to use.</p>
+<h2 id='installation' class='heading'>Installation</h2>
+
+<p>Richi is available via the <a href="https://swift.org/package-manager/">Swift Package Manager</a> which is a tool for managing the distribution of Swift code. It’s integrated with the Swift build system and automates the process of downloading, compiling, and linking dependencies.</p>
+
+<p>Once you have your Swift package set up, adding Richi as a dependency is as easy as adding it to the dependencies value of your Package.swift.</p>
+<pre class="highlight swift"><code><span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
+    <span class="o">.</span><span class="nf">package</span><span class="p">(</span>
+        <span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/aplr/Richi.git"</span><span class="p">,</span>
+        <span class="o">.</span><span class="nf">upToNextMajor</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="s">"1.0"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</code></pre>
+<h2 id='usage' class='heading'>Usage</h2>
+<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">UIViewController</span> <span class="p">{</span>
+
+    <span class="c1">/// The video player view</span>
+    <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">videoPlayer</span><span class="p">:</span> <span class="kt">VideoPlayer</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">view</span> <span class="o">=</span> <span class="kt">VideoPlayer</span><span class="p">()</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">translatesAutoresizingMaskIntoConstraints</span> <span class="o">=</span> <span class="kc">false</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">actionAtEnd</span> <span class="o">=</span> <span class="o">.</span><span class="n">loop</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">gravity</span> <span class="o">=</span> <span class="o">.</span><span class="n">aspectFit</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">autoplay</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="k">return</span> <span class="n">view</span>
+    <span class="p">}()</span>
+
+    <span class="k">override</span> <span class="kd">func</span> <span class="nf">viewDidLoad</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="o">.</span><span class="nf">viewDidLoad</span><span class="p">()</span>
+
+        <span class="c1">// Add the video player as a subview</span>
+        <span class="n">view</span><span class="o">.</span><span class="nf">addSubview</span><span class="p">(</span><span class="n">videoPlayer</span><span class="p">)</span>
+
+        <span class="c1">// Add layout constraints</span>
+        <span class="n">view</span><span class="o">.</span><span class="nf">addConstraints</span><span class="p">([</span>
+            <span class="n">videoPlayer</span><span class="o">.</span><span class="n">leadingAnchor</span><span class="o">.</span><span class="nf">constraint</span><span class="p">(</span><span class="nv">equalTo</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">leadingAnchor</span><span class="p">),</span>
+            <span class="n">videoPlayer</span><span class="o">.</span><span class="n">topAnchor</span><span class="o">.</span><span class="nf">constraint</span><span class="p">(</span><span class="nv">equalTo</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">topAnchor</span><span class="p">),</span>
+            <span class="n">videoPlayer</span><span class="o">.</span><span class="n">trailingAnchor</span><span class="o">.</span><span class="nf">constraint</span><span class="p">(</span><span class="nv">equalTo</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">trailingAnchor</span><span class="p">),</span>
+            <span class="n">videoPlayer</span><span class="o">.</span><span class="n">bottomAnchor</span><span class="o">.</span><span class="nf">constraint</span><span class="p">(</span><span class="nv">equalTo</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">bottomAnchor</span><span class="p">)</span>
+        <span class="p">])</span>
+
+        <span class="k">let</span> <span class="nv">url</span> <span class="o">=</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"</span><span class="p">)</span><span class="o">!</span>
+
+        <span class="k">let</span> <span class="nv">asset</span> <span class="o">=</span> <span class="kt">Richi</span><span class="o">.</span><span class="kt">Asset</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="n">url</span><span class="p">)</span>
+
+        <span class="c1">// Load the asset. Since autoplay is enabled, playback</span>
+        <span class="c1">// will start as soon as the asset is ready to play.</span>
+        <span class="n">videoPlayer</span><span class="o">.</span><span class="nf">load</span><span class="p">(</span><span class="nv">asset</span><span class="p">:</span> <span class="n">asset</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<h2 id='documentation' class='heading'>Documentation</h2>
+
+<p>Documentation is available <a href="https://richi.aplr.io">here</a> and provides a comprehensive documentation of the library&rsquo;s public interface. Expect usage examples and guides to be added shortly. For now, have a look at the demo app in the <em>Example</em> directory.</p>
+<h2 id='license' class='heading'>License</h2>
+
+<p>Squid is licensed under the <a href="https://github.com/aplr/Richi/blob/main/LICENSE">MIT License</a>.</p>
 
           </div>
         </section>
