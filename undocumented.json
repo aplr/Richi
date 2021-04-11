@@ -1,6 +1,12 @@
 {
   "warnings": [
-
+    {
+      "file": "/Users/runner/work/Richi/Richi/Sources/Richi/VideoPlayer.swift",
+      "line": 214,
+      "symbol": "VideoPlayer.contentMode",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    }
   ],
   "source_directory": "/Users/runner/work/Richi/Richi"
 }
