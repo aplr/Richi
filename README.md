@@ -15,7 +15,7 @@ Richi builds on top of AVPlayer and aims at simplifying its interface, while pro
 
 ► Playback events using delegates  
 ► Time observing using delegates and Combine  
-► Built-In URL-based memory and disk cache  
+► Built-In URL-based memory and disk cache (🚧 WIP)  
 ► Header-based authentication  
 ► Customizable asset loading  
 ► Video snapshots
