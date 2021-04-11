@@ -1,7 +1,9 @@
 name: Build
 on:
   push:
-    branches: [main]
+    branches: [$default-branch]
+  pull_request:
+    branches: [$default-branch]
 
 jobs:
   build:
@@ -10,4 +12,4 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build
-      run: swift build
+      run: swift build -v
