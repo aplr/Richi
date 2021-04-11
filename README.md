@@ -40,6 +40,8 @@ dependencies: [
 ## Usage
 
 ```swift
+import Richi
+
 class UIViewController {
 
     /// The video player view
