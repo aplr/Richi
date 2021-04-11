@@ -84,4 +84,4 @@ class UIViewController {
 Documentation is available [here](https://richi.aplr.io) and provides a comprehensive documentation of the library's public interface. Expect usage examples and guides to be added shortly. For now, have a look at the demo app in the *Example* directory.
 
 ## License
-Squid is licensed under the [MIT License](https://github.com/aplr/Richi/blob/main/LICENSE).
+Richi is licensed under the [MIT License](https://github.com/aplr/Richi/blob/main/LICENSE).
