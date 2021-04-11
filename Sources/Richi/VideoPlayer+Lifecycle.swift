@@ -6,25 +6,26 @@
 //
 
 
-#if os(macOS)
+#if canImport(AppKit)
 import AppKit
-#else
+#elseif canImport(UIKit)
 import UIKit
 #endif
 
 import Foundation
 
-#if os(macOS)
+#if canImport(AppKit)
 fileprivate var WillResignActiveNotificationName = NSApplication.willResignActiveNotification
 fileprivate var DidBecomeActiveNotificationName = NSApplication.didBecomeActiveNotification
 fileprivate var DidEnterBackgroundNotificationName = NSApplication.didHideNotification
 fileprivate var WillEnterForegroundNotificationName = NSApplication.willUnhideNotification
-#else
+#elseif canImport(UIKit)
 fileprivate var WillResignActiveNotificationName = UIApplication.willResignActiveNotification
 fileprivate var DidBecomeActiveNotificationName = UIApplication.didBecomeActiveNotification
 fileprivate var DidEnterBackgroundNotificationName = UIApplication.didEnterBackgroundNotification
 fileprivate var WillEnterForegroundNotificationName = UIApplication.willEnterForegroundNotification
 #endif
+
 
 extension VideoPlayer {
     
