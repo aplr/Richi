@@ -83,7 +83,7 @@ public protocol VideoPlayerTimeDelegate: AnyObject {
     func player(_ player: VideoPlayer, didChangeCurrentTime time: TimeInterval)
 }
 
-extension VideoPlayerDelegate {
+public extension VideoPlayerDelegate {
     
     func playerReady(_ player: VideoPlayer) {
         
@@ -127,7 +127,7 @@ extension VideoPlayerDelegate {
     
 }
 
-extension VideoPlayerTimeDelegate {
+public extension VideoPlayerTimeDelegate {
     
     func player(_ player: VideoPlayer, didChangeCurrentTime time: TimeInterval) {
         
