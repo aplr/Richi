@@ -6,10 +6,24 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-macos:
     runs-on: macos-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build
       run: swift build -v
+  build-ios:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: swift build -v -Xswiftc,-swift-version,-Xswiftc,5,-Xswiftc,-sdk,-Xswiftc,`xcrun --sdk iphonesimulator --show-sdk-path`,-Xswiftc,-target,-Xswiftc,x86_64-apple-ios14.5-simulator
+  build-tvos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: swift build -v -Xswiftc,-swift-version,-Xswiftc,5,-Xswiftc,-sdk,-Xswiftc,`xcrun --sdk appletvsimulator --show-sdk-path`,-Xswiftc,-target,-Xswiftc,x86_64-apple-tvos14.5-simulator
