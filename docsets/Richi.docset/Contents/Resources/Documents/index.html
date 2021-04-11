@@ -117,7 +117,7 @@ It provides you a VideoPlayer view with a simple yet powerful API, which makes p
 
 <p>► Playback events using delegates<br>
 ► Time observing using delegates and Combine<br>
-► Built-In URL-based memory and disk cache<br>
+► Built-In URL-based memory and disk cache (🚧 WIP)<br>
 ► Header-based authentication<br>
 ► Customizable asset loading<br>
 ► Video snapshots</p>
@@ -136,7 +136,9 @@ It provides you a VideoPlayer view with a simple yet powerful API, which makes p
 <span class="p">]</span>
 </code></pre>
 <h2 id='usage' class='heading'>Usage</h2>
-<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">UIViewController</span> <span class="p">{</span>
+<pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">Richi</span>
+
+<span class="kd">class</span> <span class="kt">UIViewController</span> <span class="p">{</span>
 
     <span class="c1">/// The video player view</span>
     <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">videoPlayer</span><span class="p">:</span> <span class="kt">VideoPlayer</span> <span class="o">=</span> <span class="p">{</span>
