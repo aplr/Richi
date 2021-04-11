@@ -11,11 +11,18 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        sdk: [macosx, iphonesimulator, appletvsimulator]
+        include:
+        - sdk: macosx
+          target: x86_64-apple-macosx10.12
+        - sdk: iphonesimulator
+          target: x86_64-apple-ios14.5-simulator
+        - sdk: appletvsimulator
+          target: x86_64-apple-tvos14.5-simulator
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build
-      run: swift build -v -Xswiftc "-swift-version" -Xswiftc 5 -Xswiftc "-sdk" -Xswiftc `xcrun --sdk ${sdk} --show-sdk-path`
+      run: swift build -v -Xswiftc "-swift-version" -Xswiftc 5 -Xswiftc "-sdk" -Xswiftc `xcrun --sdk ${sdk} --show-sdk-path` -Xswiftc "-target" -Xswiftc "${target}"
       env:
         sdk: ${{ matrix.sdk }}
+        target: ${{ matrix.target }}
