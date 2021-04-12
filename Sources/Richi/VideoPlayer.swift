@@ -173,6 +173,21 @@ public class VideoPlayer: UIView {
             updateInternalTimeObserver()
         }
     }
+    
+    // MARK: - Interact with AVFoundation Objects
+    
+    /// The underlying AVPlayer object
+    open internal(set) lazy var player: AVPlayer = {
+        let player = AVPlayer()
+        player.actionAtItemEnd = .none
+        return player
+    }()
+
+    /// The underlying AVPlayerItem object currently playing
+    open internal(set) var playerItem: AVPlayerItem? {
+        get { player.currentItem }
+        set { player.replaceCurrentItem(with: newValue) }
+    }
 
     #if canImport(UIKit)
     /// :nodoc:
@@ -184,12 +199,6 @@ public class VideoPlayer: UIView {
     var playerLayer: AVPlayerLayer {
         layer as! AVPlayerLayer
     }
-
-    lazy var player: AVPlayer = {
-        let player = AVPlayer()
-        player.actionAtItemEnd = .none
-        return player
-    }()
 
     // Observers
     var playerTimeObserver: Any?
@@ -204,12 +213,6 @@ public class VideoPlayer: UIView {
     var _preferredMaximumResolution: CGSize = .zero
 
     var pausedReason: Richi.PausedReason = .waitKeepUp
-
-    /// The current player item
-    var playerItem: AVPlayerItem? {
-        get { player.currentItem }
-        set { player.replaceCurrentItem(with: newValue) }
-    }
     
     #if canImport(UIKit)
     public override var contentMode: UIView.ContentMode {
