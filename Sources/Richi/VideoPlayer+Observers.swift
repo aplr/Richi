@@ -88,6 +88,7 @@ extension VideoPlayer {
                 if playerItem.status == .failed {
                     self.playbackState = .failed(.playerItemError(playerItem.error))
                 } else if playerItem.status == .readyToPlay, let asset = self.asset {
+                    self.playbackState = .stopped
                     self.runOnMainLoop {
                         self.delegate?.player(self, didLoadAsset: asset)
                     }

@@ -13,6 +13,7 @@ public struct Richi {
 
     /// An enum that describes how the video is displayed within a layer’s bounds rectangle.
     public enum Gravity {
+        
         /// The player should preserve the video’s aspect ratio and fill the layer’s bounds.
         case aspectFill
 
@@ -25,9 +26,13 @@ public struct Richi {
 
     /// An enum that describes the playback state of the Video Player
     public enum PlaybackState: Equatable, CustomStringConvertible {
+                
         /// The playback has failed because of the encapsulated error.
         case failed(_ error: Richi.Error)
-
+        
+        /// The asset is loading
+        case loading
+        
         /// The playback has been paused
         case paused
 
@@ -41,6 +46,8 @@ public struct Richi {
             switch self {
             case .failed(let error):
                 return "Failed (\(error))"
+            case .loading:
+                return "Loading"
             case .paused:
                 return "Paused"
             case .playing:
@@ -52,9 +59,10 @@ public struct Richi {
 
         var isPausable: Bool {
             switch self {
-            case .paused: fallthrough
+            case .failed(_): return false
+            case .loading: return false
+            case .paused: return true
             case .playing: return true
-            case .failed(_): fallthrough
             case .stopped: return false
             }
         }
@@ -62,6 +70,7 @@ public struct Richi {
         public static func == (lhs: Richi.PlaybackState, rhs: Richi.PlaybackState) -> Bool {
             switch (lhs, rhs) {
             case (.failed, .failed): return true
+            case (.loading, .loading): return true
             case (.paused, .paused): return true
             case (.playing, .playing): return true
             case (.stopped, .stopped): return true

@@ -282,7 +282,7 @@ extension VideoPlayer {
             stop()
         }
 
-        playbackState = .stopped
+        playbackState = .loading
         pausedReason = .waitKeepUp
 
         updatePlayerItem(nil)
