@@ -120,12 +120,12 @@ extension ViewController: VideoPlayerDelegate {
         print("Player Loaded Asset")
     }
     
-    func playerWillStartFromBeginning(_ player: VideoPlayer) {
-        print("Player Will Start From Beginning")
-    }
-    
     func playerDidEnd(_ player: VideoPlayer) {
         print("Player Did End")
+    }
+    
+    func playerDidPlayToEnd(_ player: VideoPlayer) {
+        print("Player Did Play To End")
     }
     
     func playerWillLoop(_ player: VideoPlayer) {

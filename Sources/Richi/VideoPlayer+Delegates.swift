@@ -65,15 +65,15 @@ public protocol VideoPlayerDelegate: AnyObject {
     ///   - size: The video asset's size
     func player(_ player: VideoPlayer, didChangeVideoSize size: CGSize)
     
-    /// Tells the delegate that the player will start playback from the beginning.
-    ///
-    /// - Parameter player: The player object
-    func playerWillStartFromBeginning(_ player: VideoPlayer)
-    
     /// Tells the delegate that the playback of the current item did end.
     ///
     /// - Parameter player: The player object
     func playerDidEnd(_ player: VideoPlayer)
+    
+    /// Tells the delegate that the playback did play to end time.
+    ///
+    /// - Parameter player: The player object
+    func playerDidPlayToEnd(_ player: VideoPlayer)
     
     /// Tells the delegate that the playback of the current item is about to loop.
     ///
@@ -126,11 +126,11 @@ public extension VideoPlayerDelegate {
         
     }
     
-    func playerWillStartFromBeginning(_ player: VideoPlayer) {
+    func playerDidEnd(_ player: VideoPlayer) {
         
     }
     
-    func playerDidEnd(_ player: VideoPlayer) {
+    func playerDidPlayToEnd(_ player: VideoPlayer) {
         
     }
     

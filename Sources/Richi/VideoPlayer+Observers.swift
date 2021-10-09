@@ -175,11 +175,14 @@ extension VideoPlayer {
         }
 
         if playerItem.isPlaybackLikelyToKeepUp, pausedReason == .waitKeepUp {
-            self.autoPlay()
+            autoPlay()
         }
     }
     
     func didPlayToEndTime() {
+        // Notify the delegate that the player did play to end time
+        delegate?.playerDidPlayToEnd(self)
+        
         if actionAtEnd == .loop {
             // Notify the delegate that the player is about to loop
             delegate?.playerWillLoop(self)

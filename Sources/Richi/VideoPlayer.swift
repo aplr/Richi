@@ -298,7 +298,6 @@ extension VideoPlayer {
 
     /// Plays the current asset from the beginning
     open func playFromBeginning() {
-        delegate?.playerWillStartFromBeginning(self)
         player.seek(to: .zero) { _ in self.play() }
     }
 
