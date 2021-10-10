@@ -396,21 +396,23 @@ extension VideoPlayer {
     /// - Parameters:
     ///   - time: The time at which to capture the snapshot
     ///   - completion: The block to invoke when the snapshot completes. Provides the image if no error occured.
-    open func snapshot(at time: CMTime? = nil, completion: ((_ image: UIImage?, _ error: Error?) -> Void)?) {
+    open func snapshot(at time: CMTime? = nil, completion: @escaping (_ image: UIImage?, _ error: Error?) -> Void) {
         guard let asset = playerItem?.asset else {
-            completion?(nil, nil)
+            completion(nil, nil)
             return
         }
 
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
 
         let snapshotTime = time ?? currentTime
-
-        imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: snapshotTime)]) { (requestedTime, image, actualTime, result, error) in
+        
+        imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: snapshotTime)]) { requestedTime, image, actualTime, result, error in
             guard let image = image else {
                 DispatchQueue.main.async {
-                    completion?(nil, error)
+                    completion(nil, error)
                 }
                 return
             }
@@ -423,13 +425,13 @@ extension VideoPlayer {
                 let image = UIImage(cgImage: image)
                 #endif
                 DispatchQueue.main.async {
-                    completion?(image, nil)
+                    completion(image, nil)
                 }
             case .failed, .cancelled:
                 fallthrough
             @unknown default:
                 DispatchQueue.main.async {
-                    completion?(nil, nil)
+                    completion(nil, nil)
                 }
             }
         }
