@@ -7,10 +7,6 @@
 
 #if canImport(AppKit)
 import AppKit
-/// :nodoc:
-public typealias UIView = NSView
-/// :nodoc:
-public typealias UIImage = NSImage
 #elseif canImport(UIKit)
 import UIKit
 #endif
