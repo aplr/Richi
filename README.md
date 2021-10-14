@@ -6,8 +6,9 @@
 ![Build](https://github.com/aplr/Richi/workflows/Build/badge.svg?branch=main)
 ![Documentation](https://github.com/aplr/Richi/workflows/Documentation/badge.svg)
 
-Richi is an easy-to-use video player library written in Swift, with support for iOS, tvOS and macOS.
-It provides you a VideoPlayer view with a simple yet powerful API, which makes playing videos a joy on iOS and macOS.
+Richi is an easy-to-use media player library written in Swift, with support for iOS, tvOS and macOS.
+It provides you with Video- and AudioPlayer classes, wrapping AVPlayer and making it more accessible.
+Beyond that, Richi includes a subclassable VideoPlayerView with a simple yet powerful API, which makes playing videos a joy on both iOS and macOS.
 
 ## Features
 
@@ -20,7 +21,7 @@ Richi builds on top of AVPlayer and aims at simplifying its interface, while pro
 ► Customizable asset loading  
 ► Video snapshots
 
-This library does **NOT** provide any video player UI in order to keep it as lightweight as possible, while making it highly flexible to use.
+This library does **NOT** provide any video or audio player UI in order to keep it as lightweight as possible, while making it highly flexible to use.
 
 ## Installation
 
@@ -45,8 +46,8 @@ import Richi
 class UIViewController {
 
     /// The video player view
-    lazy var videoPlayer: VideoPlayer = {
-        let view = VideoPlayer()
+    lazy var videoPlayer: VideoPlayerView = {
+        let view = VideoPlayerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.actionAtEnd = .loop
         view.gravity = .aspectFit
@@ -74,7 +75,7 @@ class UIViewController {
 
         // Load the asset. Since autoplay is enabled, playback
         // will start as soon as the asset is ready to play.
-        videoPlayer.load(asset: asset)
+        videoPlayer.asset = asset
     }
 }
 ```
