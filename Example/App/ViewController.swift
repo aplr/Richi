@@ -11,8 +11,8 @@ import Combine
 
 class ViewController: UIViewController {
     
-    private lazy var videoPlayer: VideoPlayer = {
-        let view = VideoPlayer()
+    private lazy var videoPlayer: VideoPlayerView = {
+        let view = VideoPlayerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.actionAtEnd = .loop
         view.delegate = self
@@ -96,43 +96,59 @@ class ViewController: UIViewController {
 
 extension ViewController: VideoPlayerDelegate {
     
-    func playerReady(_ player: VideoPlayer) {
+    func playerReady(_ player: MediaPlayer) {
         print("Player Ready")
     }
     
-    func player(_ player: VideoPlayer, didChangePlaybackStateFrom oldState: Richi.PlaybackState, to newState: Richi.PlaybackState) {
+    func playerReadyForDisplay(_ player: MediaPlayer) {
+        print("Player Ready For Display")
+    }
+    
+    func player(
+        _ player: MediaPlayer,
+        didChangePlaybackStateFrom oldState: Richi.PlaybackState,
+        to newState: Richi.PlaybackState
+    ) {
         
     }
     
-    func player(_ player: VideoPlayer, didChangeBufferingStateFrom oldState: Richi.BufferingState, to newState: Richi.BufferingState) {
+    func player(
+        _ player: MediaPlayer,
+        didChangeBufferingStateFrom oldState: Richi.BufferingState,
+        to newState: Richi.BufferingState
+    ) {
         
     }
     
-    func player(_ player: VideoPlayer, didChangeBufferTime bufferTime: Double) {
+    func player(_ player: MediaPlayer, didChangeBufferTime bufferTime: Double) {
         
     }
     
-    func player(_ player: VideoPlayer, didFailWithError error: Richi.Error) {
+    func player(_ player: MediaPlayer, didFailWithError error: Richi.Error) {
         print("Player Failed")
     }
     
-    func player(_ player: VideoPlayer, didLoadAsset asset: Richi.Asset) {
+    func player(_ player: MediaPlayer, didLoadAsset asset: Richi.Asset) {
         print("Player Loaded Asset")
     }
     
-    func playerDidEnd(_ player: VideoPlayer) {
+    func player(_ player: MediaPlayer, didChangePresentationSize size: CGSize) {
+        print("Payer Did Change Presentation Size")
+    }
+    
+    func playerDidEnd(_ player: MediaPlayer) {
         print("Player Did End")
     }
     
-    func playerDidPlayToEnd(_ player: VideoPlayer) {
+    func playerDidPlayToEnd(_ player: MediaPlayer) {
         print("Player Did Play To End")
     }
     
-    func playerWillLoop(_ player: VideoPlayer) {
+    func playerWillLoop(_ player: MediaPlayer) {
         print("Player Will Loop")
     }
     
-    func playerDidLoop(_ player: VideoPlayer) {
+    func playerDidLoop(_ player: MediaPlayer) {
         print("Player Did Loop")
     }
     

@@ -1,5 +1,5 @@
 //
-//  AnyPublisher+Create.swift
+//  MediaPlayer+Combine.swift
 //  Richi
 //
 //  Created by Andreas Pfurtscheller on 07.04.21.
@@ -12,7 +12,7 @@ import AVFoundation
 
 // MARK: - Time Publishers
 
-extension VideoPlayer {
+extension MediaPlayer {
 
     /// Creates a publisher that emits an event when specified times are traversed during normal playback.
     ///
