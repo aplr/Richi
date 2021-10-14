@@ -1,0 +1,34 @@
+query GetPodcast($id: String!) {
+  podcast(
+    identifier: {
+      id: $id,
+      type: APPLE_PODCASTS
+    }
+  ) {
+    id
+    title
+    imageUrl
+    episodes(first: 10) {
+      paginatorInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+      data {
+        id
+        title
+        audioUrl
+        length
+      }
+    }
+    author {
+      email
+      name
+    }
+  }
+}

@@ -6,11 +6,52 @@
 //
 
 import UIKit
+import Combine
+
+enum PlayerType: String {
+    case video
+    case audio
+    
+    var viewController: UIViewController {
+        switch self {
+        case .audio: return AudioViewController()
+        case .video: return VideoViewController()
+        }
+    }
+}
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    
+    var viewController: UIViewController? {
+        didSet {
+            window?.rootViewController = viewController
+            window?.makeKeyAndVisible()
+        }
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
 
+    override init() {
+        super.init()
+        
+        UserDefaults.standard.publisher(for: \.playerType)
+            .map({ $0.flatMap({ PlayerType(rawValue: $0) }) })
+            .replaceNil(with: .video)
+            .receive(on: DispatchQueue.main)
+            .map({ Optional($0.viewController) })
+            .assign(to: \.viewController, on: self)
+            .store(in: &cancellables)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(deviceDidShake(_:)),
+            name: .DeviceDidShake,
+            object: nil
+        )
+    }
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -24,10 +65,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window?.tintColor = accentColor
         }
         
-        self.window?.rootViewController = ViewController()
-        self.window?.makeKeyAndVisible()
+        window?.makeKeyAndVisible()
+    }
+    
+    @objc private func deviceDidShake(_ notification: Notification) {
+        let debugSheet = UIAlertController(title: "Select Player", message: nil, preferredStyle: .actionSheet)
+        debugSheet.addAction(UIAlertAction(title: "Video", style: .destructive, handler: { _ in
+            self.showPlayer(.video)
+        }))
+        debugSheet.addAction(UIAlertAction(title: "Audio", style: .destructive, handler: { _ in
+            self.showPlayer(.audio)
+        }))
+        debugSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.window?.rootViewController?.present(debugSheet, animated: true)
     }
 
+    private func showPlayer(_ playerType: PlayerType) {
+        UserDefaults.standard.playerType = playerType.rawValue
+    }
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.

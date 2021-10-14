@@ -1,0 +1,13 @@
+mutation RequestAccessToken($id: String!, $secret: String!) {
+    requestAccessToken(
+        input: {
+            grant_type: CLIENT_CREDENTIALS
+            client_id: $id
+            client_secret: $secret
+        }
+    ) {
+        access_token
+        token_type
+        expires_in
+    }
+}

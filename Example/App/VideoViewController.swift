@@ -9,7 +9,7 @@ import UIKit
 import Richi
 import Combine
 
-class ViewController: UIViewController {
+class VideoViewController: UIViewController {
     
     private lazy var videoPlayer: VideoPlayerView = {
         let view = VideoPlayerView()
@@ -57,7 +57,7 @@ class ViewController: UIViewController {
         view.addGestureRecognizer(doubleTapGestureRecognizer)
         view.addGestureRecognizer(singleTapGestureRecognizer)
         
-        let videoURL = URL(string: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
+        let videoURL = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
         
         videoPlayer.load(asset: .init(url: videoURL))
     }
@@ -94,7 +94,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: VideoPlayerDelegate {
+extension VideoViewController: VideoPlayerDelegate {
     
     func playerReady(_ player: MediaPlayer) {
         print("Player Ready")
