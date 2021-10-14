@@ -21,6 +21,10 @@ import AVFoundation
 public class VideoPlayer: UIView {
 
     // MARK: - Public Properties
+    
+    public static var defaultConfiguration = Configuration()
+    
+    public let configuration: Configuration
 
     /// A value that specifies how the video is displayed within the view's bounds.
     open var gravity: Richi.Gravity {
@@ -214,6 +218,8 @@ public class VideoPlayer: UIView {
 
     var pausedReason: Richi.PausedReason = .waitKeepUp
     
+    var assetLoader: AssetLoader?
+    
     #if canImport(UIKit)
     public override var contentMode: UIView.ContentMode {
         didSet {
@@ -225,7 +231,8 @@ public class VideoPlayer: UIView {
     // MARK: - Creating a Video Player
     
     /// Initializes and returns a newly allocated player view object with a zero rect frame.
-    public init() {
+    public init(configuration: Configuration = VideoPlayer.defaultConfiguration) {
+        self.configuration = configuration
         super.init(frame: .zero)
         commonSetup()
     }
@@ -234,6 +241,7 @@ public class VideoPlayer: UIView {
     ///
     /// - Parameter coder: The coder object
     public required init?(coder: NSCoder) {
+        self.configuration = VideoPlayer.defaultConfiguration
         super.init(coder: coder)
         commonSetup()
     }
@@ -535,8 +543,20 @@ extension VideoPlayer {
         }
 
         bufferingState = .unknown
-
-        let avAsset = makeAVAsset(from: asset)
+        
+        let assetLoader = AssetLoader(
+            asset: asset,
+            dataLoader: configuration.dataLoader,
+            dataCache: configuration.dataCache,
+            queue: configuration.assetLoadingQueue
+        )
+        
+        self.assetLoader = assetLoader
+        
+        guard let avAsset = assetLoader.makeAvAsset() else {
+            return
+        }
+        
         let keys = ["tracks", "playable", "duration"]
 
         avAsset.loadValuesAsynchronously(forKeys: keys) { [weak self] in
@@ -564,16 +584,6 @@ extension VideoPlayer {
                 return playerItem
             }())
         }
-    }
-    
-    func makeAVAsset(from asset: Richi.Asset) -> AVAsset {
-        var options: [String: Any] = [
-            "AVURLAssetHTTPHeaderFieldsKey": asset.headers
-        ]
-        if let mimeType = asset.mimeType {
-            options["AVURLAssetOutOfBandMIMETypeKey"] = mimeType
-        }
-        return AVURLAsset(url: asset.url, options: options)
     }
 }
 
