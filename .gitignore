@@ -76,3 +76,7 @@ Dependencies/
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+Config.xcconfig
+
+Api.swift

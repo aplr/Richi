@@ -1,5 +1,5 @@
 //
-//  VideoPlayerView+Lifecycle.swift
+//  MediaPlayer+Lifecycle.swift
 //  Richi
 //
 //  Created by Andreas Pfurtscheller on 09.04.21.
@@ -27,7 +27,7 @@ fileprivate var WillEnterForegroundNotificationName = UIApplication.willEnterFor
 #endif
 
 
-extension VideoPlayer {
+extension MediaPlayer {
     
     func addLifecycleObservers() {
         NotificationCenter.default.addObserver(

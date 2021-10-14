@@ -1,0 +1,12 @@
+//
+//  Config.xcconfig
+//  App
+//
+//  Created by Andreas Pfurtscheller on 14.10.21.
+//
+
+// Copy this file to Config.xcconfig and put your podchaser api keys below, without quotes.
+// https://features.podchaser.com/api/
+
+API_KEY =
+API_SECRET =

@@ -1,5 +1,5 @@
 //
-//  VideoPlayerView+Observers.swift
+//  MediaPlayer+Observers.swift
 //  Richi
 //
 //  Created by Andreas Pfurtscheller on 09.04.21.
@@ -11,7 +11,7 @@ import AVFoundation
 
 // MARK: - Player Observers
 
-extension VideoPlayer {
+extension MediaPlayer {
         
     private func removeInternalTimeObserver() {
         guard let playerTimeObserver = playerTimeObserver else { return }
@@ -63,9 +63,9 @@ extension VideoPlayer {
 
 // MARK: - Player Item Observers
 
-extension VideoPlayer {
+extension MediaPlayer {
     
-    func addPlayerItemObservers(to playerItem: AVPlayerItem) {
+    @objc func addPlayerItemObservers(to playerItem: AVPlayerItem) {
         
         NotificationCenter.default.addObserver(
             self,
@@ -90,7 +90,8 @@ extension VideoPlayer {
                 } else if playerItem.status == .readyToPlay, let asset = self.asset {
                     self.playbackState = .stopped
                     self.runOnMainLoop {
-                        self.delegate?.player(self, didLoadAsset: asset)
+                        self._delegate?.player(self, didLoadAsset: asset)
+                        self._delegate?.playerReady(self)
                     }
                 }
             })
@@ -123,16 +124,6 @@ extension VideoPlayer {
 
                 self.bufferDidChange()
             }
-        )
-        
-        playerItemObservers.append(
-            playerItem.observe(\.presentationSize, options: [.new, .old], changeHandler: { [weak self] (playerItem, change) in
-                guard let self = self else { return }
-                
-                self.runOnMainLoop {
-                    self.delegate?.player(self, didChangeVideoSize: change.newValue ?? .zero)
-                }
-            })
         )
     }
     
@@ -169,7 +160,7 @@ extension VideoPlayer {
             if _lastBufferTime != bufferedTime {
                 _lastBufferTime = bufferedTime
                 self.runOnMainLoop {
-                    self.delegate?.player(self, didChangeBufferTime: bufferedTime)
+                    self._delegate?.player(self, didChangeBufferTime: bufferedTime)
                 }
             }
         }
@@ -181,15 +172,15 @@ extension VideoPlayer {
     
     func didPlayToEndTime() {
         // Notify the delegate that the player did play to end time
-        delegate?.playerDidPlayToEnd(self)
+        _delegate?.playerDidPlayToEnd(self)
         
         if actionAtEnd == .loop {
             // Notify the delegate that the player is about to loop
-            delegate?.playerWillLoop(self)
+            _delegate?.playerWillLoop(self)
             // Seek to the start and play
             playFromBeginning()
             // Notify the delegate that the player has looped
-            delegate?.playerDidLoop(self)
+            _delegate?.playerDidLoop(self)
         } else if actionAtEnd == .freeze {
             // Stop playing at the end
             stop()
@@ -197,25 +188,5 @@ extension VideoPlayer {
             // Seek to the start and stop
             player.seek(to: .zero) { _ in self.stop() }
         }
-    }
-}
-
-// MARK: - Player Layer Observers
-
-extension VideoPlayer {
-    
-    func addPlayerLayerObservers() {
-        playerLayerObserver = playerLayer.observe(\.isReadyForDisplay, options: [.new, .old]) { [weak self] (object, change) in
-            guard let self = self else { return }
-            
-            self.runOnMainLoop {
-                self.delegate?.playerReady(self)
-            }
-        }
-    }
-
-    func removePlayerLayerObservers() {
-        playerLayerObserver?.invalidate()
-        playerLayerObserver = nil
     }
 }
