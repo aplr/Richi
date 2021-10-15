@@ -15,16 +15,11 @@ let package = Package(
             targets: ["Richi"]
         ),
     ],
-    dependencies: [
-        .package(
-            url: "https://github.com/pinterest/PINCache.git",
-            .branch("master")
-        ),
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "Richi",
-            dependencies: ["PINCache"]
+            dependencies: []
         ),
         .testTarget(
             name: "RichiTests",
